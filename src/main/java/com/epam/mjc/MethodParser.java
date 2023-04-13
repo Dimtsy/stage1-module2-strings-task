@@ -1,5 +1,9 @@
 package com.epam.mjc;
 
+import com.sun.jdi.connect.Connector;
+
+import java.util.*;
+
 public class MethodParser {
 
     /**
@@ -19,7 +23,55 @@ public class MethodParser {
      * @param signatureString source string to parse
      * @return {@link MethodSignature} object filled with parsed values from source string
      */
+
     public MethodSignature parseFunction(String signatureString) {
-        throw new UnsupportedOperationException("You should implement this method.");
+        String accessModifier = null;
+        String returnType = null;
+        String methodName = null;
+        StringSplitter splitter = new StringSplitter();
+        List<MethodSignature.Argument> arguments = new ArrayList<>();
+        String[] arrayAccessModifier = new String[]{"public", "private", "protected", "default"};
+        Collection col = new ArrayList<String>();
+        col.add(" ");
+        col.add("(");
+        col.add(", ");
+        col.add(")");
+
+        List<String> b = splitter.splitByDelimiters(signatureString, col);
+
+        StringJoiner joiner = new StringJoiner(" ");
+        for (String variable : b) {
+            joiner.add(variable);
+        }
+
+        StringTokenizer st01 = new StringTokenizer(joiner.toString(), " ");
+
+        if (st01.hasMoreTokens()) {
+            String st11 = st01.nextToken();
+            for (String accessModif : arrayAccessModifier) {
+                if (st11.equals(accessModif)) {
+                    accessModifier = accessModif;
+                }
+            }
+
+            if (accessModifier == null) {
+                returnType = st11;
+                methodName = st01.nextToken();
+            } else {
+                returnType = st01.nextToken();
+                methodName = st01.nextToken();
+            }
+
+            while (st01.hasMoreTokens()) {
+                String key1 = st01.nextToken();
+                String key2 = st01.nextToken();
+                arguments.add(new MethodSignature.Argument(key1, key2));
+            }
+        }
+        MethodSignature methodSignature = new MethodSignature(methodName, arguments);
+        methodSignature.setAccessModifier(accessModifier);
+        methodSignature.setReturnType(returnType);
+
+        return methodSignature;
     }
 }
